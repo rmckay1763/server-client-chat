@@ -13,8 +13,7 @@ import java.net.InetAddress;
  * 
  * @author Robert McKay
  */
-public class ClientModel
-{
+public class ClientModel {
     private boolean isConnected;
     private int port;
     private InetAddress clientAddress;
@@ -28,17 +27,13 @@ public class ClientModel
      * @param address The target address (the server) for establishing a connection.
      * @param port The target port for establishing a connection.
      */
-    public ClientModel(InetAddress address, int port)
-    {
+    public ClientModel(InetAddress address, int port) {
         isConnected = false;
         serverAddress = address;
         this.port = port;
-        try
-        {
+        try {
             clientAddress = InetAddress.getLocalHost();
-        }
-        catch (UnknownHostException uhe)
-        {
+        } catch (UnknownHostException uhe) {
             clientAddress = InetAddress.getLoopbackAddress();
         }
     }
@@ -47,8 +42,7 @@ public class ClientModel
      * Accessor method for isConnected
      * @return True if the an open I/O stream exists with the server, false otherwise.
      */
-    public boolean isConnected()
-    {
+    public boolean isConnected() {
         return isConnected;
     }
 
@@ -56,8 +50,7 @@ public class ClientModel
      * Accessor method for the address of the client.
      * @return The local address of this client.
      */
-    public InetAddress getClientAddress()
-    {
+    public InetAddress getClientAddress() {
         return clientAddress;
     }
 
@@ -65,8 +58,7 @@ public class ClientModel
      * Mutator method for the server address.
      * @param address The address of the target server.
      */
-    public void setServerAddress(InetAddress address)
-    {
+    public void setServerAddress(InetAddress address) {
         serverAddress = address;
     }
 
@@ -75,14 +67,10 @@ public class ClientModel
      * @param port The new port to use for connections.
      * @return True if the port is in range (0 - 65535), false otherwise.
      */
-    public boolean setPort(int port)
-    {
-        if (port < 0 || port > 65535)
-        {
+    public boolean setPort(int port) {
+        if (port < 0 || port > 65535) {
             return false;
-        }
-        else
-        {
+        } else {
             this.port = port;
             return true;
         }       
@@ -92,22 +80,16 @@ public class ClientModel
      * Establishes a connection and I/O stream the server using the stored server address and port.
      * @return True if the I/O stream establishes successfully, false, otherwise.
      */
-    public boolean connect()
-    {
-        if (isConnected)
-        {
+    public boolean connect() {
+        if (isConnected) {
             return true;
-        }
-        try
-        {
+        } try {
             connection = new Socket(serverAddress, port);
             inputStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             outputStream = new DataOutputStream(connection.getOutputStream());
             isConnected = true;
             return true;
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             isConnected = false;
             return false;
         }
@@ -117,22 +99,17 @@ public class ClientModel
      * Terminates the current I/O stream and current connection.
      * @return True if I/O stream closes successfully, false otherwise.
      */
-    public boolean disconnect()
-    {
-        if (!isConnected())
-        {
+    public boolean disconnect() {
+        if (!isConnected()) {
             return true;
         }
-        try
-        {
+        try {
             outputStream.close();
             inputStream.close();
             connection.close();
             isConnected = false;
             return true;
-        }
-        catch(IOException ioe)
-        {
+        } catch(IOException ioe) {
             return false;
         }
     }
@@ -142,19 +119,14 @@ public class ClientModel
      * @param message The message to push.
      * @return True if the messages sends successfully, false otherwise.
      */
-    public boolean sendMessage(String message)
-    {
-        if (!isConnected)
-        {
+    public boolean sendMessage(String message) {
+        if (!isConnected) {
             return false;
         }
-        try
-        {
+        try {
             outputStream.writeBytes(message + "\n");
             return true;
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             return false;
         }    
     }
@@ -163,18 +135,13 @@ public class ClientModel
      * Pulls a message form the input stream.
      * @return The message from the input stream. Null if not successful.
      */
-    public String receiveMessage()
-    {
-        if (!isConnected)
-        {
+    public String receiveMessage() {
+        if (!isConnected) {
             return null;
         }
-        try
-        {
+        try {
             return inputStream.readLine();
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             return null;
         }
     }

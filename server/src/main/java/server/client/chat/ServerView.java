@@ -14,8 +14,7 @@ import javax.swing.JScrollPane;
  * 
  * @author Robert McKay
  */
-public class ServerView extends JFrame
-{
+public class ServerView extends JFrame {
     // public class constants
     public static final String DEFAULT_MESSAGE = "<Enter message here>";
 
@@ -23,6 +22,7 @@ public class ServerView extends JFrame
     private static final long serialVersionUID = 1L;
 	private static final int WIDTH = 850;
     private static final int HEIGHT = 500;
+    private static final int PADDING = 10;
 
     // components for the chat area
     private JPanel chatPanel;
@@ -46,22 +46,21 @@ public class ServerView extends JFrame
     /**
      * Constructor.
      */
-    public ServerView()
-    {
+    public ServerView() {
         super("Chat: Server Side");
         setDefaultCloseOperation((JFrame.EXIT_ON_CLOSE));
         setSize(WIDTH, HEIGHT);
         addChatPanel();
         addMessagePanel();
         addOptionsPanel();
+        setLocation(PADDING, PADDING);
         setVisible(true);
     }
 
     /**
      * Initializes and adds the chat area components to the view.
      */
-    private void addChatPanel()
-    {
+    private void addChatPanel() {
         // chat box
         chatText = new JTextArea(20, 50);
         chatText.setEditable(false);
@@ -74,8 +73,7 @@ public class ServerView extends JFrame
     /**
      * Initializes and adds the send message components to the view.
      */
-    private void addMessagePanel()
-    {
+    private void addMessagePanel() {
         // message input field
         messageField = new JTextField(50);
         messageField.setText(DEFAULT_MESSAGE);
@@ -100,8 +98,7 @@ public class ServerView extends JFrame
      * Initializes and adds the options components to the view.
      * Options: start, disconnect, kill, update port, help.
      */
-    private void addOptionsPanel()
-    {
+    private void addOptionsPanel() {
         // start button
         startButton = new JButton("Start Server");
         startButton.setToolTipText("Make the server active");
@@ -136,8 +133,7 @@ public class ServerView extends JFrame
      * Gets the text in the send message text field
      * @return The message in the send message text field
      */
-    public String getMessage()
-    {
+    public String getMessage() {
         return messageField.getText();
     }
 
@@ -145,44 +141,70 @@ public class ServerView extends JFrame
      * Appends a message to the next line of the chat area.
      * @param message The message to append.
      */
-    public void addMessage(String message)
-    {
+    public void addMessage(String message) {
         chatText.append("\n" + message);
     }
 
     /**
      * Clear all text in the chat box.
      */
-    public void clear()
-    {
+    public void clear() {
         chatText.setText(null);
     }
 
+    /**
+     * Adds a listener to the send message button in the view.
+     * @param listener ActionListener to add to the send button.
+     */
     public void addSendButtonListener(ActionListener listener) {
         sendButton.addActionListener(listener);
         messageField.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the clear button in the view.
+     * @param listener ActionListener to add to the clear button.
+     */
     public void addClearButtonListener(ActionListener listener) {
         clearButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the start server button in the view.
+     * @param listener ActionListener to add to the start server button.
+     */
     public void addStartButtonListener(ActionListener listener) {
         startButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the disconnect button in the view.
+     * @param listener ActionListener to add to the disconnect button.
+     */
     public void addDisconnectButtonListener(ActionListener listener) {
         disconnectButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the kill server button in the view.
+     * @param listener ActionListener to add to the kill server button.
+     */
     public void addKillButtonListener(ActionListener listener) {
         killButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the update port button in the view.
+     * @param listener ActionListener to add to the update port view.
+     */
     public void addPortButtonListener(ActionListener listener) {
         portButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the help button in the view.
+     * @param listener ActionListener to add to the help button.
+     */
     public void addHelpButtonListener(ActionListener listener) {
         helpButton.addActionListener(listener);
     }

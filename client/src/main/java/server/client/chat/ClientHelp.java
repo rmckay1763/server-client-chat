@@ -9,8 +9,7 @@ import java.awt.Font;
  * 
  * @author Robert McKay
  */
-public class ClientHelp extends JFrame
-{
+public class ClientHelp extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final int WIDTH = 500;
     private static final int HEIGHT = 400;
@@ -30,8 +29,7 @@ public class ClientHelp extends JFrame
     /**
      * Constructor.
      */
-    public ClientHelp()
-    {
+    public ClientHelp() {
         super("Client Help");
         setSize(WIDTH, HEIGHT);
         JTextArea text = new JTextArea();

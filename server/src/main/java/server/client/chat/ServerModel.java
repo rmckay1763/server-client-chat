@@ -13,8 +13,7 @@ import java.net.InetAddress;
  * 
  * @author Robert McKay
  */
-public class ServerModel
-{
+public class ServerModel {
     private boolean isStarted;
     private boolean isConnected;
     private int port;
@@ -28,8 +27,7 @@ public class ServerModel
      * Constructor.
      * @param port The port number to use for connections.
      */
-    public ServerModel(int port)
-    {
+    public ServerModel(int port) {
         isStarted = false;
         isConnected = false;
         this.port = port;
@@ -40,8 +38,7 @@ public class ServerModel
      * Accessor method for isStarted.
      * @return True if the ServerSocket is initialized, false otherwise.
      */
-    public boolean isStarted()
-    {
+    public boolean isStarted() {
         return isStarted;
     }
 
@@ -49,8 +46,7 @@ public class ServerModel
      * Accessor method for isConnected.
      * @return True if an open I/O stream exits with a client, false otherwise.
      */
-    public boolean isConnected()
-    {
+    public boolean isConnected() {
         return isConnected;
     }
 
@@ -58,8 +54,7 @@ public class ServerModel
      * Accessor method for the server address.
      * @return The local address of the this server.
      */
-    public InetAddress getServerAddress()
-    {
+    public InetAddress getServerAddress() {
         return serverAddress;
     }
 
@@ -67,8 +62,7 @@ public class ServerModel
      * Accessor method for the port.
      * @return The listening port associated with this server.
      */
-    public int getPort()
-    {
+    public int getPort() {
         return port;
     }
 
@@ -77,14 +71,10 @@ public class ServerModel
      * @param port The new port to use for connections.
      * @return True if the port is in range (0 - 65535), false otherwise.
      */
-    public boolean setPort(int port)
-    {
-        if (port < 0 || port > 65535)
-        {
+    public boolean setPort(int port) {
+        if (port < 0 || port > 65535) {
             return false;
-        }
-        else
-        {
+        } else {
             this.port = port;
             return true;
         }
@@ -94,16 +84,12 @@ public class ServerModel
      * Initializes the ServerSocket with the stored port value.
      * @return True if ServerSocket successfully initializes, false otherwise.
      */
-    public boolean start()
-    {
-        try
-        {
+    public boolean start() {
+        try {
             server = new ServerSocket(port);
             isStarted = true;
             return true;
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             return false;
         }
     }
@@ -112,22 +98,17 @@ public class ServerModel
      * Waits for a client to connect and establishes I/O stream.
      * @return True if I/O stream establishes successfully, false otherwise.
      */
-    public boolean connect()
-    {
-        if (!isStarted)
-        {
+    public boolean connect() {
+        if (!isStarted) {
             return false;
         }
-        try
-        {
+        try {
             connection = server.accept();
             inputStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             outputStream = new DataOutputStream(connection.getOutputStream());
             isConnected = true;
             return true;
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             isConnected = false;
             return false;
         }
@@ -137,22 +118,17 @@ public class ServerModel
      * Terminates the current I/O stream and current connection.
      * @return True if I/O stream closes successfully, false otherwise.
      */
-    public boolean disconnect()
-    {
-        if (!isConnected())
-        {
+    public boolean disconnect() {
+        if (!isConnected()) {
             return true;
         }
-        try
-        {
+        try {
             outputStream.close();
             inputStream.close();
             connection.close();
             isConnected = false;
             return true;
-        }
-        catch(IOException ioe)
-        {
+        } catch(IOException ioe) {
             return false;
         }
     }
@@ -161,21 +137,16 @@ public class ServerModel
      * Terminates the ServerSocket associated with this Server.
      * @return True if all open connections close successfully.
      */
-    public boolean kill()
-    {
-        if (!isStarted())
-        {
+    public boolean kill() {
+        if (!isStarted()) {
             return true;
         }
         disconnect();
-        try
-        {
+        try {
             server.close();
             isStarted = false;
             return true;
-        }
-        catch(IOException ioe)
-        {
+        } catch(IOException ioe) {
             return false;
         }
     }
@@ -185,19 +156,14 @@ public class ServerModel
      * @param message The message to push.
      * @return True if the messages sends successfully, false otherwise.
      */
-    public boolean sendMessage(String message)
-    {
-        if (!isConnected)
-        {
+    public boolean sendMessage(String message) {
+        if (!isConnected) {
             return false;
         }
-        try
-        {
+        try {
             outputStream.writeBytes(message + "\n");
             return true;
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             return false;
         }
     }
@@ -206,18 +172,13 @@ public class ServerModel
      * Pulls a message form the input stream.
      * @return The message from the input stream. Null if not successful.
      */
-    public String receiveMessage()
-    {
-        if (!isConnected)
-        {
+    public String receiveMessage() {
+        if (!isConnected) {
             return null;
         }
-        try
-        {
+        try {
             return inputStream.readLine();
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             return null;
         }
     }

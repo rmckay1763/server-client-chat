@@ -14,8 +14,8 @@ import javax.swing.JScrollPane;
  * 
  * @author Robert McKay
  */
-public class ClientView extends JFrame
-{
+public class ClientView extends JFrame {
+
     // public class constants
     public static final String DEFAULT_MESSAGE = "<Enter message here>";
     
@@ -23,6 +23,7 @@ public class ClientView extends JFrame
     private static final long serialVersionUID = 1L;
 	private static final int WIDTH = 850;
     private static final int HEIGHT = 500;
+    private static final int PADDING = 10;
 
     // components for the chat area
     private JPanel chatPanel;
@@ -46,23 +47,21 @@ public class ClientView extends JFrame
     /**
      * Constructor.
      */
-    public ClientView()
-    {
+    public ClientView() {
         super("Chat: Client Side");
         setDefaultCloseOperation((JFrame.EXIT_ON_CLOSE));
         setSize(WIDTH, HEIGHT);
         addChatPanel();
         addMessagePanel();
         addOptionsPanel();
+        setLocation(WIDTH + PADDING, PADDING);
         setVisible(true);
     }
 
     /**
      * Initializes and adds the chat area components to the view.
      */
-    private void addChatPanel()
-    {
-        // chat box
+    private void addChatPanel() {
         chatText = new JTextArea(20, 50);
         chatText.setEditable(false);
         chatPane = new JScrollPane(chatText);
@@ -74,8 +73,7 @@ public class ClientView extends JFrame
     /**
      * Initializes and adds the send message components to the view.
      */
-    private void addMessagePanel()
-    {
+    private void addMessagePanel() {
         
         // message input field
         messageField = new JTextField(50);
@@ -101,8 +99,8 @@ public class ClientView extends JFrame
      * Initializes and adds the options components to the view.
      * Options: connect, disconnect, update port, update address, help.
      */
-    private void addOptionsPanel()
-    {
+    private void addOptionsPanel() {
+
         // connect button
         connectButton = new JButton("Connect");
         connectButton.setToolTipText("Connect to the server");
@@ -137,8 +135,7 @@ public class ClientView extends JFrame
      * Acessor method for the text in the send message text field
      * @return The message in the send message text field
      */
-    public String getMessage()
-    {
+    public String getMessage() {
         return messageField.getText();
     }
 
@@ -146,44 +143,70 @@ public class ClientView extends JFrame
      * Appends a message to the next line of the chat area.
      * @param message The message to append.
      */
-    public void addMessage(String message)
-    {
+    public void addMessage(String message) {
         chatText.append("\n" + message);
     }
 
     /**
      * Clear all text in the chat box.
      */
-    public void clear()
-    {
+    public void clear() {
         chatText.setText(null);
     }
 
+    /**
+     * Adds a listener to the send message button.
+     * @param listener ActionListener to add to the send button.
+     */
     public void addSendButtonListener(ActionListener listener) {
         sendButton.addActionListener(listener);
         messageField.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the clear button in the view.
+     * @param listener ActionListener for the clear button.
+     */
     public void addClearButtonListener(ActionListener listener) {
         clearButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener for the connect button in the view.
+     * @param listener ActionListener for the connect button.
+     */
     public void addConnectButtonListener(ActionListener listener) {
         connectButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener for the disconnect button in the view.
+     * @param listener ActionListener to add to the disconnect button.
+     */
     public void addDisconnectButtonListener(ActionListener listener) {
         disconnectButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the update port button in the view.
+     * @param listener ActionListener to add to the update port button.
+     */
     public void addPortButtonListener(ActionListener listener) {
         portButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the update address button in the view.
+     * @param listener ActionListener to add to the update address button.
+     */
     public void addAddressButtonListener(ActionListener listener) {
         addressButton.addActionListener(listener);
     }
 
+    /**
+     * Adds a listener to the help button in the view.
+     * @param listener ActionListener to add to the help button.
+     */
     public void addHelpButtonListener(ActionListener listener) {
         helpButton.addActionListener(listener);
     }

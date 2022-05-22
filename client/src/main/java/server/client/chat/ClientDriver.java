@@ -8,20 +8,17 @@ import javax.swing.SwingUtilities;
  *
  * @author Robert McKay
  */
-public class ClientDriver
-{
+public class ClientDriver {
     /**
      * Entry point. 
      * @param args unused.
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         int port = 5000;
         InetAddress serverAddress = InetAddress.getLoopbackAddress();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 ClientView view = new ClientView();
                 ClientModel model = new ClientModel(serverAddress, port);
                 ClientController controller = new ClientController(view, model);

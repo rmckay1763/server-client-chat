@@ -6,8 +6,7 @@ import java.util.Date;
  * 
  * @author Robert McKay
  */
-public class ServerController
-{
+public class ServerController {
     // class constants
     private static final boolean CLOSED_BY_SERVER = true;
     private static final boolean CLOSED_BY_CLIENT = false;
@@ -24,13 +23,10 @@ public class ServerController
     /**
      * Inner class. Listens for clients until server is killed.
      */
-    private class ClientListener extends Thread
-    {
+    private class ClientListener extends Thread {
         @Override
-        public void run()
-        {
-            while(model.isStarted())
-            {
+        public void run() {
+            while(model.isStarted()) {
                 listen();
             }
         }
@@ -39,13 +35,10 @@ public class ServerController
     /**
      * Inner class. Listens for incomming messages until connection is closed.
      */
-    private class MessageListener extends Thread
-    {
+    private class MessageListener extends Thread {
         @Override
-        public void run()
-        {
-            while (model.isConnected())
-            {
+        public void run() {
+            while (model.isConnected()) {
                 receiveMessage();
             }
         }
@@ -56,12 +49,14 @@ public class ServerController
      * @param view The view associated with this controller.
      * @param model The model associated with this controller.
      */
-    public ServerController(ServerView view, ServerModel model)
-    {
+    public ServerController(ServerView view, ServerModel model) {
         this.view = view;
         this.model = model;
     }
 
+    /**
+     * Adds a listener to each action component in the view.
+     */
     public void addListeners() {
         view.addStartButtonListener(e -> start());
         view.addDisconnectButtonListener(e -> disconnect(CLOSED_BY_SERVER, SHOW_FEEDBACK));
@@ -75,27 +70,17 @@ public class ServerController
     /**
      * Sends a message to the client.
      */
-    private void send()
-    {
+    private void send() {
         String message = view.getMessage();
-        if (!model.isConnected())
-        {
+        if (!model.isConnected()) {
             message = "Not connected with a client";
-        }
-        else if (message.equals("") || message.equals(ServerView.DEFAULT_MESSAGE))
-        {
+        } else if (message.equals("") || message.equals(ServerView.DEFAULT_MESSAGE)) {
             message = "No message entered in message field";
-        }
-        else if (message.length() > 1000)
-        {
+        } else if (message.length() > 1000) {
             message = "Message exceeds maximamum size (1000 characters)";
-        }
-        else if (model.sendMessage(message))
-        {
+        } else if (model.sendMessage(message)) {
             message = "Server sends - " + new Date() + ": " + message;
-        }
-        else
-        {
+        } else {
             message = "Failed to send message";
         }
         view.addMessage(message);
@@ -104,21 +89,17 @@ public class ServerController
     /**
      * Receives a message from the server.
      */
-    private void receiveMessage()
-    {
+    private void receiveMessage() {
         boolean terminate = false;
         String message = model.receiveMessage();
-        if (message != null)
-        {
-            if (message.equals("connection terminated by client"))
-            {
+        if (message != null) {
+            if (message.equals("connection terminated by client")) {
                 terminate = true;
             }
             message = "Client sends - " + new Date() + ": " + message;
             view.addMessage(message);
         }
-        if(terminate)
-        {
+        if(terminate) {
             disconnect(CLOSED_BY_CLIENT, SHOW_FEEDBACK);
         }
     }
@@ -126,23 +107,18 @@ public class ServerController
     /**
      * Starts the server
      */
-    private void start()
-    {
+    private void start() {
         String feedback;
-        if (model.isStarted())
-        {
+        if (model.isStarted()) {
             feedback = "Server already started";
-        }
-        else if (model.start())
-        {
+        } else if (model.start()) {
             clientListener = new ClientListener();
             clientListener.start();
             isListening = true;
             feedback = "Server started successfully.\n" +
                        "Address of server: " + model.getServerAddress() + "\n" +
                        "Listening for clients on port " + model.getPort();
-        } else
-        {
+        } else {
             feedback = "Failed to start server";
         }
         view.addMessage(feedback);
@@ -151,10 +127,8 @@ public class ServerController
     /**
      * Listens for a client on the open connection.
      */
-    private void listen()
-    {
-        if (model.connect())
-        {
+    private void listen() {
+        if (model.connect()) {
             messageListener = new MessageListener();
             messageListener.start();
             view.addMessage("Connection established with client");
@@ -164,26 +138,19 @@ public class ServerController
     /**
      * Terminates the current connection with the client.
      */
-    private void disconnect(boolean closedByServer, boolean showFeedback)
-    {
-        if (model.isConnected())
-        {
-            if (closedByServer)
-            {
+    private void disconnect(boolean closedByServer, boolean showFeedback) {
+        if (model.isConnected()) {
+            if (closedByServer) {
                 model.sendMessage("connection terminated by server");
             }
             model.disconnect();
-            if (showFeedback)
-            {
+            if (showFeedback) {
                 view.addMessage("Disconnected from client");
             }
-        }
-        else if(showFeedback)
-        {
+        } else if(showFeedback) {
             view.addMessage("Already disconnected");
         }
-        if (isListening && showFeedback)
-        {
+        if (isListening && showFeedback) {
             view.addMessage("Listening for clients on port " + model.getPort());
         }
     }
@@ -191,18 +158,14 @@ public class ServerController
     /**
      * Terminates the server.
      */
-    private void kill()
-    {
+    private void kill() {
         String feedback;
-        if (model.isStarted())
-        {
+        if (model.isStarted()) {
             disconnect(CLOSED_BY_SERVER, SHOW_NO_FEEDBACK);
             model.kill();
             isListening = false;
             feedback = "Server is now inactive";
-        }
-        else
-        {
+        } else {
             feedback = "Server already stopped";
         }
         view.addMessage(feedback);
@@ -219,23 +182,15 @@ public class ServerController
         if (model.isStarted())
         {
             feedback = "Kill server before updating port";
-        }
-        else
-        {
-            try
-            {
+        } else {
+            try {
                 port = Integer.parseInt(candidate);
-                if (model.setPort(port))
-                {
+                if (model.setPort(port)) {
                     feedback = "Port updated successfully";
-                }
-                else // new port must be out of range
-                {
+                } else {
                     feedback = "Port number is out of range [0 - 65535]";
                 }
-            }
-            catch (NumberFormatException nfe)
-            {
+            } catch (NumberFormatException nfe) {
                 feedback = "Invalid input. Enter a number [0 - 65536]";
             }
         }
@@ -245,8 +200,7 @@ public class ServerController
     /**
      * Displays the help window
      */
-    private void help()
-    {
+    private void help() {
         ServerHelp helpWindow = new ServerHelp();
         helpWindow.setVisible(true);
     }
