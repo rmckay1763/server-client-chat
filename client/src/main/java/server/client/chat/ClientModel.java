@@ -33,7 +33,7 @@ public class ClientModel {
         this.port = port;
         try {
             clientAddress = InetAddress.getLocalHost();
-        } catch (UnknownHostException uhe) {
+        } catch (UnknownHostException err) {
             clientAddress = InetAddress.getLoopbackAddress();
         }
     }
@@ -56,9 +56,13 @@ public class ClientModel {
 
     /**
      * Mutator method for the server address.
-     * @param address The address of the target server.
+     * @param address InetAddress of the target server.
+     * @throws ClientModelException If the client has an established connection with a server.
      */
-    public void setServerAddress(InetAddress address) {
+    public void setServerAddress(InetAddress address) throws ClientModelException {
+        if (isConnected) {
+            throw new ClientModelException("Disconnect before updating server address");
+        }
         serverAddress = address;
     }
 
@@ -66,42 +70,45 @@ public class ClientModel {
      * Mutator method for the port.
      * @param port The new port to use for connections.
      * @return True if the port is in range (0 - 65535), false otherwise.
+     * @throws ClientModelException If the port is out of range or the client is connected to a server.
      */
-    public boolean setPort(int port) {
+    public void setPort(int port) throws ClientModelException {
         if (port < 0 || port > 65535) {
-            return false;
-        } else {
-            this.port = port;
-            return true;
-        }       
+            throw new ClientModelException("port number out of range");
+        }
+        if (isConnected) {
+            throw new ClientModelException("disconnect server before changing port");
+        }
+        this.port = port;      
     }
 
     /**
      * Establishes a connection and I/O stream the server using the stored server address and port.
      * @return True if the I/O stream establishes successfully, false, otherwise.
+     * @throws ClientModelException If the client is already connected or the new connection fails.
      */
-    public boolean connect() {
+    public void connect() throws ClientModelException {
         if (isConnected) {
-            return true;
+            throw new ClientModelException("Already connected to server");
         } try {
             connection = new Socket(serverAddress, port);
             inputStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             outputStream = new DataOutputStream(connection.getOutputStream());
             isConnected = true;
-            return true;
-        } catch (IOException ioe) {
+        } catch (IOException err) {
             isConnected = false;
-            return false;
+            throw new ClientModelException("Failed to connect to server");
         }
     }
 
     /**
      * Terminates the current I/O stream and current connection.
      * @return True if I/O stream closes successfully, false otherwise.
+     * @throws ClientModelException If the client is already disconnected or if disconnecting fails.
      */
-    public boolean disconnect() {
-        if (!isConnected()) {
-            return true;
+    public boolean disconnect() throws ClientModelException {
+        if (!isConnected) {
+            throw new ClientModelException("Client not connected to server");
         }
         try {
             outputStream.close();
@@ -109,8 +116,8 @@ public class ClientModel {
             connection.close();
             isConnected = false;
             return true;
-        } catch(IOException ioe) {
-            return false;
+        } catch(IOException err) {
+            throw new ClientModelException("Failed to disconnect from the server");
         }
     }
 
@@ -118,31 +125,29 @@ public class ClientModel {
      * Pushes a message into the output stream.
      * @param message The message to push.
      * @return True if the messages sends successfully, false otherwise.
+     * @throws ClientModelException If the client is not connected or fails to send the message.
      */
-    public boolean sendMessage(String message) {
+    public void sendMessage(String message) throws ClientModelException {
         if (!isConnected) {
-            return false;
+            throw new ClientModelException("Client not connected to server");
         }
         try {
             outputStream.writeBytes(message + "\n");
-            return true;
-        } catch (IOException ioe) {
-            return false;
+        } catch (IOException err) {
+            throw new ClientModelException(err.getMessage());
         }    
     }
 
     /**
      * Pulls a message form the input stream.
-     * @return The message from the input stream. Null if not successful.
+     * @return The message from the input stream.
+     * @throws ClientModelException If the input stream fails to read from the server.
      */
-    public String receiveMessage() {
-        if (!isConnected) {
-            return null;
-        }
+    public String receiveMessage() throws ClientModelException  {
         try {
             return inputStream.readLine();
-        } catch (IOException ioe) {
-            return null;
+        } catch (IOException err) {
+            throw new ClientModelException("from model receive message: " + err.getMessage());
         }
     }
 }

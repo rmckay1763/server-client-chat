@@ -50,44 +50,52 @@ public class ClientController {
         view.addPortButtonListener(e -> updatePort());
         view.addAddressButtonListener(e -> updateAddress());
         view.addHelpButtonListener(e -> help());
-        view.addSendButtonListener(e -> send());
+        view.addSendButtonListener(e -> sendMessage());
         view.addClearButtonListener(e -> view.clear());
+    }
+
+    /**
+     * Gets and validates the message from the view input field.
+     * @return Valid message from the view.
+     * @throws IllegalArgumentException If the message is empty or exceeds 1000 characters.
+     */
+    private String getValidMessage() throws IllegalArgumentException {
+        String message = view.getMessage();
+        if (message.equals("") || message.equals(ClientView.DEFAULT_MESSAGE)) {
+            throw new IllegalArgumentException("No message entered in message field");
+        } else if (message.length() > 1000) {
+            throw new IllegalArgumentException("Message exceeds maximamum size (1000 characters)");
+        }
+        return message;
     }
 
     /**
      * Sends a message to the server.
      */
-    private void send() {
-        String message = view.getMessage();
-        if (!model.isConnected()) {
-            message = "Not connected to the server";
-        } else if (message.equals("") || message.equals(ClientView.DEFAULT_MESSAGE)) {
-            message = "No message entered in message field";
-        } else if (message.length() > 1000) {
-            message = "Message exceeds maximamum size (1000 characters)";
-        } else if (model.sendMessage(message)) {
-            message = "Client sends - " + new Date() + ": " + message;
-        } else {
-            message = "Failed to send message";
+    private void sendMessage() {
+        try {
+            String message = getValidMessage();
+            model.sendMessage(message);
+            view.addMessage("Client sends - " + new Date() + ": " + message);
+        } catch (IllegalArgumentException err) {
+            view.addMessage(err.getMessage());
+        } catch (ClientModelException err) {
+            view.addMessage(err.getMessage());
         }
-        view.addMessage(message);
     }
 
     /**
      * Receives a message from the server.
      */
     private void receiveMessage() {
-        boolean terminate = false;
-        String message = model.receiveMessage();
-        if (message != null) {
+        try {
+            String message = model.receiveMessage();
+            view.addMessage("Server sends - " + new Date() + ": " + message);
             if (message.equals("connection terminated by server")) {
-                terminate = true;
+                disconnect(CLOSED_BY_SERVER);
             }
-            message = "Server sends - " + new Date() + ": " + message;
-            view.addMessage(message);
-        }
-        if(terminate) {
-            disconnect(CLOSED_BY_SERVER);
+        } catch (ClientModelException err) {
+            view.addMessage(err.getMessage());
         }
     }
 
@@ -95,17 +103,14 @@ public class ClientController {
      * Connects the client to the server.
      */
     private void connect() {
-        if (model.isConnected()) {
-            view.addMessage("Already connected");
-            return;
-        }
-        if (model.connect()) {
+        try {
+            model.connect();
             view.addMessage("Addres of client: " + model.getClientAddress());
             view.addMessage("Connected with server!");
             messageListener = new MessageListener();
             messageListener.start();
-        } else {
-            view.addMessage("Failed to connect.");
+        } catch (ClientModelException err) {
+            view.addMessage(err.getMessage());
         }
     }
 
@@ -114,59 +119,48 @@ public class ClientController {
       * @param closedByClient True if the client closed the connection.
       */
     private void disconnect(boolean closedByClient) {
-        if (model.isConnected()) {
+        try {
             if (closedByClient) {
                 model.sendMessage("connection terminated by client");
             }
             model.disconnect();
             view.addMessage("Disconnected from Server");
-        } else {
-            view.addMessage("Already disconnected");
+        } catch (ClientModelException err) {
+            view.addMessage(err.getMessage());
         }
     }
 
     /**
-     * Update the port number use for connections.
+     * Update the port number used for connections.
      */
     private void updatePort() {
         int port;
-        String candidate, feedback;
+        String candidate;
         candidate = view.getMessage();
-        if (model.isConnected()) {
-            feedback = "Disconnect client before updating port";
-        } else {
-            try {
-                port = Integer.parseInt(candidate);
-                if (model.setPort(port)) {
-                    feedback = "Port updated successfully";
-                } else {
-                    feedback = "Port number is out of range [0 - 65535]";
-                }
-            } catch (NumberFormatException nfe) {
-                feedback = "Invalid input. Enter a number [0 - 65536]";
-            }
+        try {
+            port = Integer.parseInt(candidate);
+            model.setPort(port);
+            view.addMessage("Port updated successfully");
+        } catch (ClientModelException err) {
+            view.addMessage(err.getMessage());
+        } catch (NumberFormatException err) {
+            view.addMessage("Port number not a valid integer");
         }
-        view.addMessage(feedback);
     }
 
     /**
      * Update the target server address to connect to.
      */
     private void updateAddress() {
-        InetAddress address;
-        String candidate, feedback;
-        candidate = view.getMessage();
-        if (model.isConnected()) {
-            view.addMessage("Disconnect before updating server address");
-        } else {
-            try {
-                address = InetAddress.getByName(candidate);
-                model.setServerAddress(address);
-                feedback = "Target server address updated successfully!";
-            } catch (UnknownHostException uhe) {
-                feedback = "Failed to verify address";
-            }
-            view.addMessage(feedback);
+        String candidate = view.getMessage();
+        try {
+            InetAddress address = InetAddress.getByName(candidate);
+            model.setServerAddress(address);
+            view.addMessage("Target server address updated successfully!");
+        } catch (UnknownHostException err) {
+            view.addMessage("Failed to verify address");
+        } catch (ClientModelException err) {
+            view.addMessage(err.getMessage());
         }
     }
 
