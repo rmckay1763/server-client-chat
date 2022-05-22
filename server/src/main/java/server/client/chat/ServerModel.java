@@ -68,29 +68,32 @@ public class ServerModel {
 
     /**
      * Mutator method for the port.
-     * @param port The new port to use for connections.
-     * @return True if the port is in range (0 - 65535), false otherwise.
-     */
-    public boolean setPort(int port) {
+    * @param port The new port to use for connections.
+    * @throws ServerModelException If the port is out of range [0 -65535].
+    */
+    public void setPort(int port) throws ServerModelException {
         if (port < 0 || port > 65535) {
-            return false;
-        } else {
-            this.port = port;
-            return true;
+            throw new ServerModelException("Port number out of range");
         }
+        if (isStarted) {
+            throw new ServerModelException("kill server before changing port");
+        }
+        this.port = port;
     }
 
     /**
      * Initializes the ServerSocket with the stored port value.
-     * @return True if ServerSocket successfully initializes, false otherwise.
+     * @throws ServerModelException If server already started or fails to start.
      */
-    public boolean start() {
+    public void start() throws ServerModelException {
+        if(isStarted) {
+            throw new ServerModelException("Server already started");
+        }
         try {
             server = new ServerSocket(port);
             isStarted = true;
-            return true;
-        } catch (IOException ioe) {
-            return false;
+        } catch (IOException err) {
+            throw new ServerModelException("Failed to start server");
         }
     }
 
@@ -98,19 +101,23 @@ public class ServerModel {
      * Waits for a client to connect and establishes I/O stream.
      * @return True if I/O stream establishes successfully, false otherwise.
      */
-    public boolean connect() {
+
+    /**
+     * Waits for a client to connect and establishes I/O stream.
+     * @throws ServerModelException If server not started.
+     * @throws IOException If I/O stream connection fails.
+     */
+    public void connect() throws ServerModelException, IOException {
         if (!isStarted) {
-            return false;
+            throw new ServerModelException("Server not started");
         }
         try {
             connection = server.accept();
             inputStream = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             outputStream = new DataOutputStream(connection.getOutputStream());
             isConnected = true;
-            return true;
-        } catch (IOException ioe) {
-            isConnected = false;
-            return false;
+        } catch (IOException err) {
+            throw err;
         }
     }
 
@@ -118,68 +125,67 @@ public class ServerModel {
      * Terminates the current I/O stream and current connection.
      * @return True if I/O stream closes successfully, false otherwise.
      */
-    public boolean disconnect() {
+
+    /**
+     * Terminates the current I/O stream and current connection.
+     * @throws ServerModelException If not connected to a client or fails to close I/O streams.
+     */
+    public void disconnect() throws ServerModelException {
         if (!isConnected()) {
-            return true;
+            throw new ServerModelException("Server not connected to a client");
         }
         try {
             outputStream.close();
             inputStream.close();
             connection.close();
             isConnected = false;
-            return true;
-        } catch(IOException ioe) {
-            return false;
+        } catch(IOException err) {
+            throw new ServerModelException(err.getMessage());
         }
     }
 
     /**
      * Terminates the ServerSocket associated with this Server.
-     * @return True if all open connections close successfully.
+     * @throws ServerModelException If server not started or fails to close connection.
      */
-    public boolean kill() {
+    public void kill() throws ServerModelException {
         if (!isStarted()) {
-            return true;
+            throw new ServerModelException("Server already inactive");
         }
-        disconnect();
         try {
             server.close();
             isStarted = false;
-            return true;
-        } catch(IOException ioe) {
-            return false;
+        } catch(IOException err) {
+            throw new ServerModelException(err.getMessage());
         }
     }
 
     /**
-     * Pushes a message into the output stream.
+     * Pushes a message onto the output stream.
      * @param message The message to push.
-     * @return True if the messages sends successfully, false otherwise.
+     * @throws ServerModelException If not connected with a client or if fails to write to output stream.
      */
-    public boolean sendMessage(String message) {
+    public void sendMessage(String message) throws ServerModelException {
         if (!isConnected) {
-            return false;
+            throw new ServerModelException("Not connected with a client");
         }
         try {
             outputStream.writeBytes(message + "\n");
-            return true;
-        } catch (IOException ioe) {
-            return false;
+        } catch (IOException err) {
+            throw new ServerModelException(err.getMessage());
         }
     }
 
     /**
      * Pulls a message form the input stream.
-     * @return The message from the input stream. Null if not successful.
+     * @returnThe message from the input stream.
+     * @throws ServerModelException If fails to read from the input stream.
      */
-    public String receiveMessage() {
-        if (!isConnected) {
-            return null;
-        }
+    public String receiveMessage() throws ServerModelException {
         try {
             return inputStream.readLine();
-        } catch (IOException ioe) {
-            return null;
+        } catch (IOException err) {
+            throw new ServerModelException(err.getMessage());
         }
     }
 }

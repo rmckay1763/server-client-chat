@@ -40,7 +40,7 @@ public class ClientModel {
 
     /**
      * Accessor method for isConnected
-     * @return True if the an open I/O stream exists with the server, false otherwise.
+     * @return True if an open I/O stream exists with the server, false otherwise.
      */
     public boolean isConnected() {
         return isConnected;
@@ -69,7 +69,6 @@ public class ClientModel {
     /**
      * Mutator method for the port.
      * @param port The new port to use for connections.
-     * @return True if the port is in range (0 - 65535), false otherwise.
      * @throws ClientModelException If the port is out of range or the client is connected to a server.
      */
     public void setPort(int port) throws ClientModelException {
@@ -83,8 +82,7 @@ public class ClientModel {
     }
 
     /**
-     * Establishes a connection and I/O stream the server using the stored server address and port.
-     * @return True if the I/O stream establishes successfully, false, otherwise.
+     * Establishes a connection and I/O stream to the server.
      * @throws ClientModelException If the client is already connected or the new connection fails.
      */
     public void connect() throws ClientModelException {
@@ -103,10 +101,9 @@ public class ClientModel {
 
     /**
      * Terminates the current I/O stream and current connection.
-     * @return True if I/O stream closes successfully, false otherwise.
      * @throws ClientModelException If the client is already disconnected or if disconnecting fails.
      */
-    public boolean disconnect() throws ClientModelException {
+    public void disconnect() throws ClientModelException {
         if (!isConnected) {
             throw new ClientModelException("Client not connected to server");
         }
@@ -115,7 +112,6 @@ public class ClientModel {
             inputStream.close();
             connection.close();
             isConnected = false;
-            return true;
         } catch(IOException err) {
             throw new ClientModelException("Failed to disconnect from the server");
         }
@@ -124,7 +120,6 @@ public class ClientModel {
     /**
      * Pushes a message into the output stream.
      * @param message The message to push.
-     * @return True if the messages sends successfully, false otherwise.
      * @throws ClientModelException If the client is not connected or fails to send the message.
      */
     public void sendMessage(String message) throws ClientModelException {
@@ -140,14 +135,13 @@ public class ClientModel {
 
     /**
      * Pulls a message form the input stream.
-     * @return The message from the input stream.
      * @throws ClientModelException If the input stream fails to read from the server.
      */
     public String receiveMessage() throws ClientModelException  {
         try {
             return inputStream.readLine();
         } catch (IOException err) {
-            throw new ClientModelException("from model receive message: " + err.getMessage());
+            throw new ClientModelException(err.getMessage());
         }
     }
 }

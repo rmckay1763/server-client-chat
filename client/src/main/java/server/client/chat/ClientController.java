@@ -95,7 +95,7 @@ public class ClientController {
                 disconnect(CLOSED_BY_SERVER);
             }
         } catch (ClientModelException err) {
-            view.addMessage(err.getMessage());
+            return;
         }
     }
 

@@ -1,4 +1,5 @@
 package server.client.chat;
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -10,11 +11,8 @@ public class ServerController {
     // class constants
     private static final boolean CLOSED_BY_SERVER = true;
     private static final boolean CLOSED_BY_CLIENT = false;
-    private static final boolean SHOW_FEEDBACK = true;
-    private static final boolean SHOW_NO_FEEDBACK = false;
 
     // class data members
-    private boolean isListening = false;
     private ServerView view;
     private ServerModel model;
     private ClientListener clientListener;
@@ -59,48 +57,56 @@ public class ServerController {
      */
     public void addListeners() {
         view.addStartButtonListener(e -> start());
-        view.addDisconnectButtonListener(e -> disconnect(CLOSED_BY_SERVER, SHOW_FEEDBACK));
+        view.addDisconnectButtonListener(e -> disconnect(CLOSED_BY_SERVER));
         view.addKillButtonListener(e -> kill());
         view.addPortButtonListener(e -> updatePort());
         view.addHelpButtonListener(e -> help());
-        view.addSendButtonListener(e -> send());
+        view.addSendButtonListener(e -> sendMessage());
         view.addClearButtonListener(e -> view.clear());
+    }
+
+    /**
+     * Gets and validates the message from the view input field.
+     * @return Valid message from the view.
+     * @throws IllegalArgumentException If the message is empty or exceeds 1000 characters.
+     */
+    private String getValidMessage() throws IllegalArgumentException {
+        String message = view.getMessage();
+        if (message.equals("") || message.equals(ServerView.DEFAULT_MESSAGE)) {
+            throw new IllegalArgumentException("No message entered in message field");
+        } else if (message.length() > 1000) {
+            throw new IllegalArgumentException("Message exceeds maximamum size (1000 characters)");
+        }
+        return message;
     }
 
     /**
      * Sends a message to the client.
      */
-    private void send() {
-        String message = view.getMessage();
-        if (!model.isConnected()) {
-            message = "Not connected with a client";
-        } else if (message.equals("") || message.equals(ServerView.DEFAULT_MESSAGE)) {
-            message = "No message entered in message field";
-        } else if (message.length() > 1000) {
-            message = "Message exceeds maximamum size (1000 characters)";
-        } else if (model.sendMessage(message)) {
-            message = "Server sends - " + new Date() + ": " + message;
-        } else {
-            message = "Failed to send message";
+    private void sendMessage() {
+        try {
+            String message = getValidMessage();
+            model.sendMessage(message);
+            view.addMessage("Server sends - " + new Date() + ": " + message);
+        } catch (IllegalArgumentException err) {
+            view.addMessage(err.getMessage());
+        } catch (ServerModelException err) {
+            view.addMessage(err.getMessage());
         }
-        view.addMessage(message);
     }
 
     /**
      * Receives a message from the server.
      */
     private void receiveMessage() {
-        boolean terminate = false;
-        String message = model.receiveMessage();
-        if (message != null) {
+        try {
+            String message = model.receiveMessage();
+            view.addMessage("Client sends - " + new Date() + ": " + message);
             if (message.equals("connection terminated by client")) {
-                terminate = true;
+                disconnect(CLOSED_BY_CLIENT);
             }
-            message = "Client sends - " + new Date() + ": " + message;
-            view.addMessage(message);
-        }
-        if(terminate) {
-            disconnect(CLOSED_BY_CLIENT, SHOW_FEEDBACK);
+        } catch (ServerModelException err) {
+            return;
         }
     }
 
@@ -108,50 +114,48 @@ public class ServerController {
      * Starts the server
      */
     private void start() {
-        String feedback;
-        if (model.isStarted()) {
-            feedback = "Server already started";
-        } else if (model.start()) {
+        try {
+            model.start();
             clientListener = new ClientListener();
             clientListener.start();
-            isListening = true;
-            feedback = "Server started successfully.\n" +
-                       "Address of server: " + model.getServerAddress() + "\n" +
-                       "Listening for clients on port " + model.getPort();
-        } else {
-            feedback = "Failed to start server";
+            view.addMessage(
+                "Server started successfully.\n" +
+                "Address of server: " + model.getServerAddress() + "\n" +
+                "Listening for clients on port " + model.getPort()
+            );
+        } catch (ServerModelException err) {
+            view.addMessage(err.getMessage());
         }
-        view.addMessage(feedback);
     }
 
     /**
      * Listens for a client on the open connection.
      */
     private void listen() {
-        if (model.connect()) {
+        try {
+            model.connect();
             messageListener = new MessageListener();
             messageListener.start();
             view.addMessage("Connection established with client");
+        } catch (ServerModelException err) {
+            view.addMessage(err.getMessage());
+        } catch (IOException err) {
+            return;
         }
     }
 
     /**
      * Terminates the current connection with the client.
      */
-    private void disconnect(boolean closedByServer, boolean showFeedback) {
-        if (model.isConnected()) {
+    private void disconnect(boolean closedByServer) {
+        try {
             if (closedByServer) {
                 model.sendMessage("connection terminated by server");
             }
             model.disconnect();
-            if (showFeedback) {
-                view.addMessage("Disconnected from client");
-            }
-        } else if(showFeedback) {
-            view.addMessage("Already disconnected");
-        }
-        if (isListening && showFeedback) {
-            view.addMessage("Listening for clients on port " + model.getPort());
+            view.addMessage("Disconnected from client");
+        } catch (ServerModelException err) {
+            view.addMessage(err.getMessage());
         }
     }
 
@@ -159,16 +163,13 @@ public class ServerController {
      * Terminates the server.
      */
     private void kill() {
-        String feedback;
-        if (model.isStarted()) {
-            disconnect(CLOSED_BY_SERVER, SHOW_NO_FEEDBACK);
+        try {
+            disconnect(CLOSED_BY_SERVER);
             model.kill();
-            isListening = false;
-            feedback = "Server is now inactive";
-        } else {
-            feedback = "Server already stopped";
+            view.addMessage("Server is now inactive");
+        } catch (ServerModelException err) {
+            view.addMessage(err.getMessage());
         }
-        view.addMessage(feedback);
     }
 
     /**
@@ -177,24 +178,17 @@ public class ServerController {
     private void updatePort()
     {
         int port;
-        String candidate, feedback;
+        String candidate;
         candidate = view.getMessage();
-        if (model.isStarted())
-        {
-            feedback = "Kill server before updating port";
-        } else {
-            try {
-                port = Integer.parseInt(candidate);
-                if (model.setPort(port)) {
-                    feedback = "Port updated successfully";
-                } else {
-                    feedback = "Port number is out of range [0 - 65535]";
-                }
-            } catch (NumberFormatException nfe) {
-                feedback = "Invalid input. Enter a number [0 - 65536]";
-            }
+        try {
+            port = Integer.parseInt(candidate);
+            model.setPort(port);
+            view.addMessage("Port number updated successfully");
+        } catch (ServerModelException err) {
+            view.addMessage(err.getMessage());
+        } catch (NumberFormatException nfe) {
+            view.addMessage("Port number not a valid integer");
         }
-        view.addMessage(feedback);
     }
 
     /**
