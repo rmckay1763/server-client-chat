@@ -17,13 +17,6 @@ import javax.swing.JScrollPane;
 public class ClientView extends JFrame
 {
     // public class constants
-    public static final String CONNECT = "connect";
-    public static final String DISCONNECT = "disconnect";
-    public static final String UPDATE_PORT = "updatePort";
-    public static final String UPDATE_ADDRESS = "updateAddress";
-    public static final String HELP = "help";
-    public static final String SEND = "send";
-    public static final String CLEAR = "clear";
     public static final String DEFAULT_MESSAGE = "<Enter message here>";
     
     // private class constants
@@ -39,16 +32,16 @@ public class ClientView extends JFrame
     // compenents to send a message
     private JPanel messagePanel;
     private JTextField messageField;
-    private JButton send;
-    private JButton clear;
+    private JButton sendButton;
+    private JButton clearButton;
 
     // components for options
     private JPanel optionsPanel;
-    private JButton connect;
-    private JButton disconnect;
-    private JButton updatePort;
-    private JButton updateAddress;
-    private JButton help;
+    private JButton connectButton;
+    private JButton disconnectButton;
+    private JButton portButton;
+    private JButton addressButton;
+    private JButton helpButton;
 
     /**
      * Constructor.
@@ -86,24 +79,21 @@ public class ClientView extends JFrame
         
         // message input field
         messageField = new JTextField(50);
-        messageField.setActionCommand(SEND);
         messageField.setText(DEFAULT_MESSAGE);
         
         // send button
-        send = new JButton("Send Message");
-        send.setActionCommand(SEND);
-        send.setToolTipText("Click to send message)");
+        sendButton = new JButton("Send Message");
+        sendButton.setToolTipText("Click to send message)");
 
         // clear button
-        clear = new JButton("Clear");
-        clear.setActionCommand(CLEAR);
-        clear.setToolTipText("clear all messages in the chat box");
+        clearButton = new JButton("Clear");
+        clearButton.setToolTipText("clear all messages in the chat box");
 
         // add message components
         messagePanel = new JPanel();
         messagePanel.add(messageField);
-        messagePanel.add(send);
-        messagePanel.add(clear);
+        messagePanel.add(sendButton);
+        messagePanel.add(clearButton);
         add(messagePanel, BorderLayout.SOUTH);
     }
 
@@ -114,37 +104,32 @@ public class ClientView extends JFrame
     private void addOptionsPanel()
     {
         // connect button
-        connect = new JButton("Connect");
-        connect.setActionCommand(CONNECT);
-        connect.setToolTipText("Connect to the server");
+        connectButton = new JButton("Connect");
+        connectButton.setToolTipText("Connect to the server");
 
         // disconnect button
-        disconnect = new JButton("Disconnect");
-        disconnect.setActionCommand(DISCONNECT);
-        disconnect.setToolTipText("Terminate a current connection");
+        disconnectButton = new JButton("Disconnect");
+        disconnectButton.setToolTipText("Terminate a current connection");
 
         // update port button
-        updatePort = new JButton("Update Port");
-        updatePort.setActionCommand(UPDATE_PORT);
-        updatePort.setToolTipText("Update the port for connections");
+        portButton = new JButton("Update Port");
+        portButton.setToolTipText("Update the port for connections");
 
         // update address button
-        updateAddress = new JButton("Update Address");
-        updateAddress.setActionCommand(UPDATE_ADDRESS);
-        updateAddress.setToolTipText("Update the target server address");
+        addressButton = new JButton("Update Address");
+        addressButton.setToolTipText("Update the target server address");
 
         // help button
-        help = new JButton("Help");
-        help.setActionCommand(HELP);
-        help.setToolTipText("Dispplay the help window");
+        helpButton = new JButton("Help");
+        helpButton.setToolTipText("Dispplay the help window");
 
         // add options to view
         optionsPanel = new JPanel();
-        optionsPanel.add(connect);
-        optionsPanel.add(disconnect);
-        optionsPanel.add(updatePort);
-        optionsPanel.add(updateAddress);
-        optionsPanel.add(help);
+        optionsPanel.add(connectButton);
+        optionsPanel.add(disconnectButton);
+        optionsPanel.add(portButton);
+        optionsPanel.add(addressButton);
+        optionsPanel.add(helpButton);
         add(optionsPanel, BorderLayout.NORTH);
     }
 
@@ -174,22 +159,34 @@ public class ClientView extends JFrame
         chatText.setText(null);
     }
 
-    /**
-     * Adds an event listener to the view buttons.
-     * @param listener The listener to add.
-     */
-    public void addListener(ActionListener listener)
-    {
+    public void addSendButtonListener(ActionListener listener) {
+        sendButton.addActionListener(listener);
         messageField.addActionListener(listener);
-        send.addActionListener(listener);
-        clear.addActionListener(listener);
-        connect.addActionListener(listener);
-        disconnect.addActionListener(listener);
-        updatePort.addActionListener(listener);
-        updateAddress.addActionListener(listener);
-        help.addActionListener(listener);
     }
 
+    public void addClearButtonListener(ActionListener listener) {
+        clearButton.addActionListener(listener);
+    }
+
+    public void addConnectButtonListener(ActionListener listener) {
+        connectButton.addActionListener(listener);
+    }
+
+    public void addDisconnectButtonListener(ActionListener listener) {
+        disconnectButton.addActionListener(listener);
+    }
+
+    public void addPortButtonListener(ActionListener listener) {
+        portButton.addActionListener(listener);
+    }
+
+    public void addAddressButtonListener(ActionListener listener) {
+        addressButton.addActionListener(listener);
+    }
+
+    public void addHelpButtonListener(ActionListener listener) {
+        helpButton.addActionListener(listener);
+    }
 }
     
 

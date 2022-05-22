@@ -24,6 +24,7 @@ public class ServerDriver
                 ServerView view = new ServerView();
                 ServerModel model = new ServerModel(port);
                 ServerController controller = new ServerController(view, model);
+                controller.addListeners();
             }
         });
     }

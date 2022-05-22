@@ -1,8 +1,6 @@
 package server.client.chat;
 
-import java.awt.event.ActionListener;
 import java.net.UnknownHostException;
-import java.awt.event.ActionEvent;
 import java.util.Date;
 import java.net.InetAddress;
 
@@ -20,7 +18,6 @@ public class ClientController
     // class data members
     private ClientView view;
     private ClientModel model;
-    private ViewListener viewListener;
     private MessageListener messageListener;
 
     /**
@@ -39,46 +36,6 @@ public class ClientController
     }
 
     /**
-     * Inner class. Listens for events from the view.
-     */
-    private class ViewListener implements ActionListener
-    {
-        @Override
-        public void actionPerformed(ActionEvent event)
-        {
-            String command = event.getActionCommand();
-            if (command.equals(ClientView.CONNECT))
-            {
-                connect();
-            }
-            else if (command.equals(ClientView.DISCONNECT))
-            {
-                disconnect(CLOSED_BY_CLIENT);
-            }
-            else if (command.equals(ClientView.UPDATE_PORT))
-            {
-                updatePort();
-            }
-            else if (command.equals(ClientView.UPDATE_ADDRESS))
-            {
-                updateAddress();
-            }
-            else if (command.equals(ClientView.HELP))
-            {
-                help();
-            }
-            else if (command.equals(ClientView.SEND))
-            {
-                send();
-            }
-            else if (command.equals(ClientView.CLEAR))
-            {
-                view.clear();
-            }
-        }
-    }
-
-    /**
      * Constructor.
      * @param view The view associated with this controller.
      * @param model The model associated with this controller.
@@ -87,8 +44,16 @@ public class ClientController
     {
         this.view = view;
         this.model = model;
-        viewListener = new ViewListener();
-        view.addListener(viewListener);
+    }
+
+    public void addListeners() {
+        view.addConnectButtonListener(e -> connect());
+        view.addDisconnectButtonListener(e -> disconnect(CLOSED_BY_CLIENT));
+        view.addPortButtonListener(e -> updatePort());
+        view.addAddressButtonListener(e -> updateAddress());
+        view.addHelpButtonListener(e -> help());
+        view.addSendButtonListener(e -> send());
+        view.addClearButtonListener(e -> view.clear());
     }
 
     /**

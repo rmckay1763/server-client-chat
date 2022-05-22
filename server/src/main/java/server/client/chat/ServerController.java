@@ -1,7 +1,4 @@
 package server.client.chat;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.util.Date;
 
 /**
@@ -21,7 +18,6 @@ public class ServerController
     private boolean isListening = false;
     private ServerView view;
     private ServerModel model;
-    private ViewListener viewListener;
     private ClientListener clientListener;
     private MessageListener messageListener;
 
@@ -56,46 +52,6 @@ public class ServerController
     }
 
     /**
-     * Inner class. Listens for the events from the view.
-     */
-    private class ViewListener implements ActionListener
-    {
-        @Override
-        public void actionPerformed(ActionEvent event)
-        {
-            String command = event.getActionCommand();
-            if (command.equals(ServerView.START))
-            {
-                start();
-            }
-            else if (command.equals(ServerView.DISCONNECT))
-            {
-                disconnect(CLOSED_BY_SERVER, SHOW_FEEDBACK);
-            }
-            else if (command.equals(ServerView.KILL))
-            {
-                kill();
-            }
-            else if (command.equals(ServerView.UPDATE_PORT))
-            {
-                updatePort();
-            }
-            else if (command.equals(ServerView.HELP))
-            {
-                help();
-            }
-            else if (command.equals(ServerView.SEND))
-            {
-                send();
-            }
-            else if (command.equals(ServerView.CLEAR))
-            {
-                view.clear();
-            }
-        }
-    }
-
-    /**
      * Constructor.
      * @param view The view associated with this controller.
      * @param model The model associated with this controller.
@@ -104,8 +60,16 @@ public class ServerController
     {
         this.view = view;
         this.model = model;
-        viewListener = new ViewListener();
-        view.addListener(viewListener);
+    }
+
+    public void addListeners() {
+        view.addStartButtonListener(e -> start());
+        view.addDisconnectButtonListener(e -> disconnect(CLOSED_BY_SERVER, SHOW_FEEDBACK));
+        view.addKillButtonListener(e -> kill());
+        view.addPortButtonListener(e -> updatePort());
+        view.addHelpButtonListener(e -> help());
+        view.addSendButtonListener(e -> send());
+        view.addClearButtonListener(e -> view.clear());
     }
 
     /**
@@ -193,7 +157,7 @@ public class ServerController
         {
             messageListener = new MessageListener();
             messageListener.start();
-            view.addMessage("Connected established with client");
+            view.addMessage("Connection established with client");
         }
     }
 

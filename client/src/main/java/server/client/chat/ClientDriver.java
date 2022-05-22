@@ -25,6 +25,7 @@ public class ClientDriver
                 ClientView view = new ClientView();
                 ClientModel model = new ClientModel(serverAddress, port);
                 ClientController controller = new ClientController(view, model);
+                controller.addListeners();
             }
         });
     }

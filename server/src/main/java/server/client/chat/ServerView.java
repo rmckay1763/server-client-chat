@@ -17,13 +17,6 @@ import javax.swing.JScrollPane;
 public class ServerView extends JFrame
 {
     // public class constants
-    public static final String START = "start";
-    public static final String DISCONNECT = "disconnect";
-    public static final String KILL = "kill";
-    public static final String UPDATE_PORT = "updatePort";
-    public static final String HELP = "help";
-    public static final String SEND = "send";
-    public static final String CLEAR = "clear";
     public static final String DEFAULT_MESSAGE = "<Enter message here>";
 
     // private class constants
@@ -39,16 +32,16 @@ public class ServerView extends JFrame
     // compenents to send a message
     private JPanel messagePanel;
     private JTextField messageField;
-    private JButton send;
-    private JButton clear;
+    private JButton sendButton;
+    private JButton clearButton;
 
     // components for options
     private JPanel optionsPanel;
-    private JButton start;
-    private JButton disconnect;
-    private JButton kill;
-    private JButton updatePort;
-    private JButton help;
+    private JButton startButton;
+    private JButton disconnectButton;
+    private JButton killButton;
+    private JButton portButton;
+    private JButton helpButton;
 
     /**
      * Constructor.
@@ -85,24 +78,21 @@ public class ServerView extends JFrame
     {
         // message input field
         messageField = new JTextField(50);
-        messageField.setActionCommand(SEND);
         messageField.setText(DEFAULT_MESSAGE);
 
         // send button
-        send = new JButton("Send Message");
-        send.setActionCommand(SEND);
-        send.setToolTipText("Click to send message");
+        sendButton = new JButton("Send Message");
+        sendButton.setToolTipText("Click to send message");
 
         // clear button
-        clear = new JButton("Clear");
-        clear.setActionCommand(CLEAR);
-        clear.setToolTipText("Clear all messages in the chat box");
+        clearButton = new JButton("Clear");
+        clearButton.setToolTipText("Clear all messages in the chat box");
 
         // add message components
         messagePanel = new JPanel();
         messagePanel.add(messageField);
-        messagePanel.add(send);
-        messagePanel.add(clear);
+        messagePanel.add(sendButton);
+        messagePanel.add(clearButton);
         add(messagePanel, BorderLayout.SOUTH);
     }
 
@@ -113,37 +103,32 @@ public class ServerView extends JFrame
     private void addOptionsPanel()
     {
         // start button
-        start = new JButton("Start Server");
-        start.setActionCommand(START);
-        start.setToolTipText("Make the server active");
+        startButton = new JButton("Start Server");
+        startButton.setToolTipText("Make the server active");
 
         // disconnect button
-        disconnect = new JButton("Disconnect");
-        disconnect.setActionCommand(DISCONNECT);
-        disconnect.setToolTipText("Terminate a current connection");
+        disconnectButton = new JButton("Disconnect");
+        disconnectButton.setToolTipText("Terminate a current connection");
 
         // kill button
-        kill = new JButton("Kill Server");
-        kill.setActionCommand(KILL);
-        kill.setToolTipText("Make the server inactive");
+        killButton = new JButton("Kill Server");
+        killButton.setToolTipText("Make the server inactive");
 
         // update port button
-        updatePort = new JButton("Update Port");
-        updatePort.setActionCommand(UPDATE_PORT);
-        updatePort.setToolTipText("Update the listening port");
+        portButton = new JButton("Update Port");
+        portButton.setToolTipText("Update the listening port");
 
         // help button
-        help = new JButton("Help");
-        help.setActionCommand(HELP);
-        help.setToolTipText("Display the help window");
+        helpButton = new JButton("Help");
+        helpButton.setToolTipText("Display the help window");
 
         // add options to view
         optionsPanel = new JPanel();
-        optionsPanel.add(start);
-        optionsPanel.add(disconnect);
-        optionsPanel.add(kill);
-        optionsPanel.add(updatePort);
-        optionsPanel.add(help);
+        optionsPanel.add(startButton);
+        optionsPanel.add(disconnectButton);
+        optionsPanel.add(killButton);
+        optionsPanel.add(portButton);
+        optionsPanel.add(helpButton);
         add(optionsPanel, BorderLayout.NORTH);
     }
 
@@ -173,20 +158,32 @@ public class ServerView extends JFrame
         chatText.setText(null);
     }
 
-    /**
-     * Adds an event listener to the view buttons.
-     * @param listener The listener to add.
-     */
-    public void addListener(ActionListener listener)
-    {
+    public void addSendButtonListener(ActionListener listener) {
+        sendButton.addActionListener(listener);
         messageField.addActionListener(listener);
-        send.addActionListener(listener);
-        clear.addActionListener(listener);
-        start.addActionListener(listener);
-        disconnect.addActionListener(listener);
-        kill.addActionListener(listener);
-        updatePort.addActionListener(listener);
-        help.addActionListener(listener);
     }
 
+    public void addClearButtonListener(ActionListener listener) {
+        clearButton.addActionListener(listener);
+    }
+
+    public void addStartButtonListener(ActionListener listener) {
+        startButton.addActionListener(listener);
+    }
+
+    public void addDisconnectButtonListener(ActionListener listener) {
+        disconnectButton.addActionListener(listener);
+    }
+
+    public void addKillButtonListener(ActionListener listener) {
+        killButton.addActionListener(listener);
+    }
+
+    public void addPortButtonListener(ActionListener listener) {
+        portButton.addActionListener(listener);
+    }
+
+    public void addHelpButtonListener(ActionListener listener) {
+        helpButton.addActionListener(listener);
+    }
 }
